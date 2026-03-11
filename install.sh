@@ -9,7 +9,7 @@
 #
 # Flags:
 #   --scope=user        Install into the VS Code User prompts directory (default, available in all projects)
-#   --scope=workspace   Install into .vscode/ in the current directory (project-specific)
+#   --scope=workspace   Install into .github/agents/ in the current directory (works with VS Code and Copilot CLI)
 
 set -euo pipefail
 
@@ -79,8 +79,8 @@ detect_user_prompts_dir() {
 }
 
 if [[ "$SCOPE" == "workspace" ]]; then
-  INSTALL_DIR="${COPILOT_ATLAS_PROMPTS_DIR:-$(pwd)/.vscode}"
-  SCOPE_LABEL="workspace (.vscode/)"
+  INSTALL_DIR="${COPILOT_ATLAS_PROMPTS_DIR:-$(pwd)/.github/agents}"
+  SCOPE_LABEL="workspace (.github/agents/)"
 else
   INSTALL_DIR="${COPILOT_ATLAS_PROMPTS_DIR:-$(detect_user_prompts_dir)}"
   SCOPE_LABEL="user (global)"
@@ -129,8 +129,8 @@ success "All agents installed to: $INSTALL_DIR"
 echo ""
 
 if [[ "$SCOPE" == "workspace" ]]; then
-  warn "Workspace install — agents are available only in this project."
-  echo "  Commit the .vscode/*.agent.md files to share them with your team."
+  warn "Workspace install — agents are available only in this project (via VS Code and Copilot CLI)."
+  echo "  Commit the .github/agents/*.agent.md files to share them with your team."
   echo ""
 fi
 

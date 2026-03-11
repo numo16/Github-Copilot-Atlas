@@ -127,7 +127,7 @@ Choose your scope:
 | Scope | When to use |
 |---|---|
 | **user** (default) | Agents available in all VS Code projects on this machine |
-| **workspace** | Agents stored in `.vscode/` — project-specific, committable to version control |
+| **workspace** | Agents stored in `.github/agents/` — works with VS Code **and** Copilot CLI, committable to version control |
 
 **macOS / Linux:**
 ```bash
@@ -166,7 +166,7 @@ $s = irm https://raw.githubusercontent.com/numo16/Github-Copilot-Atlas/main/inst
    - **Linux:** `~/.config/Code/User/prompts/` (or `~/.config/Code - Insiders/User/prompts/` for Insiders)
 
    **Workspace scope (project-specific):**
-   - Copy the files into `.vscode/` at your project root. You can commit these files to share the setup with your team.
+   - Copy the files into `.github/agents/` at your project root. This directory is recognized by both **VS Code Copilot** and **Copilot CLI**. Commit these files to share the setup with your team.
 
 3. **Apply the VS Code settings** listed in the [Configuration](#configuration) section below.
 

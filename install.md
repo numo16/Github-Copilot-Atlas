@@ -16,6 +16,7 @@ https://raw.githubusercontent.com/numo16/Github-Copilot-Atlas/main/install.md
 curl -fsSL https://raw.githubusercontent.com/numo16/Github-Copilot-Atlas/main/install.sh | bash
 
 # macOS / Linux — workspace scope (project-specific, run from project root)
+# Installs to .github/agents/ — works with both VS Code and Copilot CLI
 curl -fsSL https://raw.githubusercontent.com/numo16/Github-Copilot-Atlas/main/install.sh | bash -s -- --scope=workspace
 ```
 
@@ -24,6 +25,7 @@ curl -fsSL https://raw.githubusercontent.com/numo16/Github-Copilot-Atlas/main/in
 irm https://raw.githubusercontent.com/numo16/Github-Copilot-Atlas/main/install.ps1 | iex
 
 # Windows — workspace scope (project-specific, run from project root)
+# Installs to .github\agents\ — works with both VS Code and Copilot CLI
 $s = irm https://raw.githubusercontent.com/numo16/Github-Copilot-Atlas/main/install.ps1
 & ([scriptblock]::Create($s)) -Scope workspace
 ```
@@ -57,9 +59,10 @@ Ask the user the following question before proceeding:
 > 1. **User scope (global, recommended)** — agents are available in every VS Code
 >    project on this machine. Installed into the VS Code User prompts directory.
 >
-> 2. **Workspace scope (project-specific)** — agents are stored in `.vscode/` inside
->    the current project folder and can be committed to version control to share them
->    with the whole team.
+> 2. **Workspace scope (project-specific)** — agents are stored in `.github/agents/`
+>    inside the current project folder. This directory is recognized by both
+>    **VS Code Copilot** and **Copilot CLI**, and the files can be committed to
+>    version control to share the setup with the whole team.
 
 Record their answer as `SCOPE` (`user` or `workspace`).
 
@@ -85,12 +88,12 @@ Ask the user:
 | **Linux** | `~/.config/Code/User/prompts` | `~/.config/Code - Insiders/User/prompts` |
 | **Windows** | `%APPDATA%\Code\User\prompts` | `%APPDATA%\Code - Insiders\User\prompts` |
 
-**If SCOPE = workspace**, `INSTALL_DIR` is the `.vscode` folder inside the user's
-project root (wherever they are currently working). Ask them to confirm their project
-root path if you are not sure, then set:
+**If SCOPE = workspace**, `INSTALL_DIR` is the `.github/agents` directory inside the
+user's project root. This path is recognized by both VS Code Copilot and Copilot CLI.
+Ask them to confirm their project root path if you are not sure, then set:
 
 ```
-INSTALL_DIR = <project-root>/.vscode
+INSTALL_DIR = <project-root>/.github/agents
 ```
 
 Detect the OS automatically if possible (e.g. `uname -s` on Unix; check `$env:OS`
@@ -180,8 +183,8 @@ Add the following entries:
 - `github.copilot.chat.responsesApiReasoningEffort` — enables enhanced reasoning for
   GPT-based planning agents (Prometheus).
 
-If SCOPE = workspace, remind the user they can commit `.vscode/settings.json` along
-with the agent files so the whole team inherits the same settings automatically.
+If SCOPE = workspace, remind the user they can commit `.github/agents/settings.json`
+along with the agent files so the whole team inherits the same settings automatically.
 
 ---
 
@@ -229,6 +232,7 @@ Let them know they can read the
 [README](https://github.com/numo16/Github-Copilot-Atlas/blob/main/README.md)
 for a full overview of every agent and the recommended development workflow.
 
-If SCOPE = workspace, also remind them that committing `.vscode/*.agent.md` and
-`.vscode/settings.json` to the repository is the easiest way to share the Atlas
-setup with the entire team.
+If SCOPE = workspace, also remind them that committing `.github/agents/*.agent.md`
+to the repository is the easiest way to share the Atlas setup with the entire team,
+and that these files will be picked up automatically by both VS Code Copilot and
+Copilot CLI in that workspace.

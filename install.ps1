@@ -9,7 +9,7 @@
 #
 # Parameters:
 #   -Scope user        Install into the VS Code User prompts directory (default, available in all projects)
-#   -Scope workspace   Install into .vscode\ in the current directory (project-specific)
+#   -Scope workspace   Install into .github\agents\ in the current directory (works with VS Code and Copilot CLI)
 
 param(
   [ValidateSet("user", "workspace")]
@@ -47,9 +47,9 @@ if ($Scope -eq "workspace") {
   $InstallDir = if ($env:COPILOT_ATLAS_PROMPTS_DIR) {
     $env:COPILOT_ATLAS_PROMPTS_DIR
   } else {
-    Join-Path (Get-Location) ".vscode"
+    Join-Path (Get-Location) ".github\agents"
   }
-  $ScopeLabel = "workspace (.vscode\)"
+  $ScopeLabel = "workspace (.github\agents\)"
 } else {
   $InstallDir = if ($env:COPILOT_ATLAS_PROMPTS_DIR) {
     $env:COPILOT_ATLAS_PROMPTS_DIR
@@ -104,8 +104,8 @@ Write-Host "✓ All agents installed to: $InstallDir" -ForegroundColor Green
 Write-Host ""
 
 if ($Scope -eq "workspace") {
-  Write-Host "⚠ Workspace install — agents are available only in this project." -ForegroundColor Yellow
-  Write-Host "  Commit the .vscode\*.agent.md files to share them with your team."
+  Write-Host "⚠ Workspace install — agents are available only in this project (via VS Code and Copilot CLI)." -ForegroundColor Yellow
+  Write-Host "  Commit the .github\agents\*.agent.md files to share them with your team."
   Write-Host ""
 }
 
