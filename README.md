@@ -109,17 +109,49 @@ This repository contains custom agent prompts that work together to handle the c
 
 ## Installation
 
+### ⚡ One-liner (recommended)
+
+**Let Copilot install it for you** — paste this into any VS Code Copilot Chat session:
+
+```
+Install GitHub Copilot Atlas by following the instructions here:
+https://raw.githubusercontent.com/numo16/Github-Copilot-Atlas/main/install.md
+```
+
+Copilot will detect your OS, find the right directory, download all agents, and walk you through the settings.
+
+### 🖥️ Script install
+
+**macOS / Linux:**
+```bash
+curl -fsSL https://raw.githubusercontent.com/numo16/Github-Copilot-Atlas/main/install.sh | bash
+```
+
+**Windows (PowerShell):**
+```powershell
+irm https://raw.githubusercontent.com/numo16/Github-Copilot-Atlas/main/install.ps1 | iex
+```
+
+### 🔧 Manual install
+
+<details>
+<summary>Click to expand manual installation steps</summary>
+
 1. **Clone or download this repository:**
    ```bash
-   git clone https://github.com/bigguy345/Github-Copilot-Atlas.git
+   git clone https://github.com/numo16/Github-Copilot-Atlas.git
    ```
 
-2. **Copy agent files to VS Code User prompts directory:**
-   - **Windows:** `%APPDATA%\Code\User\prompts\` (or `%APPDATA%\Code - Insiders\User\prompts\` if using Insiders)
-   - **macOS:** `~/Library/Application Support/Code/User/prompts/` (or `~/Library/Application Support/Code - Insiders/User/prompts/` if using Insiders)
-   - **Linux:** `~/.config/Code/User/prompts/` (or `~/.config/Code - Insiders/User/prompts/` if using Insiders)
+2. **Copy all `.agent.md` files to your VS Code User prompts directory:**
+   - **Windows:** `%APPDATA%\Code\User\prompts\` (or `%APPDATA%\Code - Insiders\User\prompts\` for Insiders)
+   - **macOS:** `~/Library/Application Support/Code/User/prompts/` (or `~/Library/Application Support/Code - Insiders/User/prompts/` for Insiders)
+   - **Linux:** `~/.config/Code/User/prompts/` (or `~/.config/Code - Insiders/User/prompts/` for Insiders)
 
-3. **Reload VS Code** to recognize the new agents
+3. **Apply the VS Code settings** listed in the [Configuration](#configuration) section below.
+
+4. **Reload VS Code** to recognize the new agents.
+
+</details>
 
 ## Usage
 
