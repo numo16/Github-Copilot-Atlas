@@ -1,6 +1,15 @@
 #!/usr/bin/env bash
 # install.sh — GitHub Copilot Atlas installer for macOS and Linux
-# Usage: curl -fsSL https://raw.githubusercontent.com/numo16/Github-Copilot-Atlas/main/install.sh | bash
+#
+# Usage (user/global scope — default):
+#   curl -fsSL https://raw.githubusercontent.com/numo16/Github-Copilot-Atlas/main/install.sh | bash
+#
+# Usage (workspace/project scope — run from your project root):
+#   curl -fsSL https://raw.githubusercontent.com/numo16/Github-Copilot-Atlas/main/install.sh | bash -s -- --scope=workspace
+#
+# Flags:
+#   --scope=user        Install into the VS Code User prompts directory (default, available in all projects)
+#   --scope=workspace   Install into .vscode/ in the current directory (project-specific)
 
 set -euo pipefail
 
@@ -24,6 +33,20 @@ success() { echo -e "${GREEN}✓${RESET} $*"; }
 warn()    { echo -e "${YELLOW}⚠${RESET} $*"; }
 error()   { echo -e "${RED}✗${RESET} $*" >&2; }
 
+# ── Parse flags ───────────────────────────────────────────────────────────────
+SCOPE="user"
+for arg in "$@"; do
+  case "$arg" in
+    --scope=user)      SCOPE="user" ;;
+    --scope=workspace) SCOPE="workspace" ;;
+    *)
+      error "Unknown argument: $arg"
+      echo "Usage: $0 [--scope=user|workspace]" >&2
+      exit 1
+      ;;
+  esac
+done
+
 # ── Detect OS ─────────────────────────────────────────────────────────────────
 OS="$(uname -s)"
 case "$OS" in
@@ -35,8 +58,8 @@ case "$OS" in
     ;;
 esac
 
-# ── Detect VS Code edition ────────────────────────────────────────────────────
-detect_prompts_dir() {
+# ── Resolve install directory ─────────────────────────────────────────────────
+detect_user_prompts_dir() {
   local stable_dir insiders_dir
 
   if [[ "$OS_NAME" == "macOS" ]]; then
@@ -55,10 +78,13 @@ detect_prompts_dir() {
   fi
 }
 
-PROMPTS_DIR="$(detect_prompts_dir)"
-
-# Allow override via environment variable
-PROMPTS_DIR="${COPILOT_ATLAS_PROMPTS_DIR:-$PROMPTS_DIR}"
+if [[ "$SCOPE" == "workspace" ]]; then
+  INSTALL_DIR="${COPILOT_ATLAS_PROMPTS_DIR:-$(pwd)/.vscode}"
+  SCOPE_LABEL="workspace (.vscode/)"
+else
+  INSTALL_DIR="${COPILOT_ATLAS_PROMPTS_DIR:-$(detect_user_prompts_dir)}"
+  SCOPE_LABEL="user (global)"
+fi
 
 # ── Intro ─────────────────────────────────────────────────────────────────────
 echo ""
@@ -66,14 +92,15 @@ echo -e "${BOLD}╔════════════════════�
 echo -e "${BOLD}║      GitHub Copilot Atlas — Installer     ║${RESET}"
 echo -e "${BOLD}╚═══════════════════════════════════════════╝${RESET}"
 echo ""
-info "Detected OS : $OS_NAME"
-info "Prompts dir : $PROMPTS_DIR"
+info "Detected OS  : $OS_NAME"
+info "Scope        : $SCOPE_LABEL"
+info "Install dir  : $INSTALL_DIR"
 echo ""
 
-# ── Create prompts directory ──────────────────────────────────────────────────
-if [[ ! -d "$PROMPTS_DIR" ]]; then
-  info "Creating prompts directory …"
-  mkdir -p "$PROMPTS_DIR"
+# ── Create install directory ──────────────────────────────────────────────────
+if [[ ! -d "$INSTALL_DIR" ]]; then
+  info "Creating directory …"
+  mkdir -p "$INSTALL_DIR"
 fi
 
 # ── Download agents ───────────────────────────────────────────────────────────
@@ -82,7 +109,7 @@ echo ""
 
 FAILED=0
 for agent in "${AGENTS[@]}"; do
-  if curl -fsSL "$BASE_URL/$agent" -o "$PROMPTS_DIR/$agent"; then
+  if curl -fsSL "$BASE_URL/$agent" -o "$INSTALL_DIR/$agent"; then
     success "$agent"
   else
     error "$agent  (download failed)"
@@ -98,11 +125,23 @@ if [[ "$FAILED" -ne 0 ]]; then
   exit 1
 fi
 
-success "All agents installed to: $PROMPTS_DIR"
+success "All agents installed to: $INSTALL_DIR"
 echo ""
+
+if [[ "$SCOPE" == "workspace" ]]; then
+  warn "Workspace install — agents are available only in this project."
+  echo "  Commit the .vscode/*.agent.md files to share them with your team."
+  echo ""
+fi
+
 warn "Next steps:"
-echo "  1. Open VS Code User Settings JSON (Ctrl+Shift+P → 'Open User Settings (JSON)')"
-echo "     and add:"
+if [[ "$SCOPE" == "user" ]]; then
+  echo "  1. Open VS Code User Settings JSON (Ctrl+Shift+P → 'Open User Settings (JSON)')"
+  echo "     and add:"
+else
+  echo "  1. Open VS Code Workspace Settings JSON (Ctrl+Shift+P → 'Open Workspace Settings (JSON)')"
+  echo "     and add:"
+fi
 echo '     {'
 echo '       "chat.customAgentInSubagent.enabled": true,'
 echo '       "github.copilot.chat.responsesApiReasoningEffort": "high"'

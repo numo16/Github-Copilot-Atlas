@@ -118,18 +118,34 @@ Install GitHub Copilot Atlas by following the instructions here:
 https://raw.githubusercontent.com/numo16/Github-Copilot-Atlas/main/install.md
 ```
 
-Copilot will detect your OS, find the right directory, download all agents, and walk you through the settings.
+Copilot will ask whether you want a **user (global)** or **workspace (project-specific)** install, detect your OS, find the right directory, download all agents, and walk you through the settings.
 
 ### 🖥️ Script install
 
+Choose your scope:
+
+| Scope | When to use |
+|---|---|
+| **user** (default) | Agents available in all VS Code projects on this machine |
+| **workspace** | Agents stored in `.vscode/` — project-specific, committable to version control |
+
 **macOS / Linux:**
 ```bash
+# User scope (global)
 curl -fsSL https://raw.githubusercontent.com/numo16/Github-Copilot-Atlas/main/install.sh | bash
+
+# Workspace scope (run from your project root)
+curl -fsSL https://raw.githubusercontent.com/numo16/Github-Copilot-Atlas/main/install.sh | bash -s -- --scope=workspace
 ```
 
 **Windows (PowerShell):**
 ```powershell
+# User scope (global)
 irm https://raw.githubusercontent.com/numo16/Github-Copilot-Atlas/main/install.ps1 | iex
+
+# Workspace scope (run from your project root)
+$s = irm https://raw.githubusercontent.com/numo16/Github-Copilot-Atlas/main/install.ps1
+& ([scriptblock]::Create($s)) -Scope workspace
 ```
 
 ### 🔧 Manual install
@@ -142,10 +158,15 @@ irm https://raw.githubusercontent.com/numo16/Github-Copilot-Atlas/main/install.p
    git clone https://github.com/numo16/Github-Copilot-Atlas.git
    ```
 
-2. **Copy all `.agent.md` files to your VS Code User prompts directory:**
+2. **Copy all `.agent.md` files to your chosen directory:**
+
+   **User scope (global):**
    - **Windows:** `%APPDATA%\Code\User\prompts\` (or `%APPDATA%\Code - Insiders\User\prompts\` for Insiders)
    - **macOS:** `~/Library/Application Support/Code/User/prompts/` (or `~/Library/Application Support/Code - Insiders/User/prompts/` for Insiders)
    - **Linux:** `~/.config/Code/User/prompts/` (or `~/.config/Code - Insiders/User/prompts/` for Insiders)
+
+   **Workspace scope (project-specific):**
+   - Copy the files into `.vscode/` at your project root. You can commit these files to share the setup with your team.
 
 3. **Apply the VS Code settings** listed in the [Configuration](#configuration) section below.
 

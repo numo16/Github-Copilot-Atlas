@@ -12,13 +12,20 @@ https://raw.githubusercontent.com/numo16/Github-Copilot-Atlas/main/install.md
 **Alternative: run the automated install script directly**
 
 ```bash
-# macOS / Linux
+# macOS / Linux — user scope (global, default)
 curl -fsSL https://raw.githubusercontent.com/numo16/Github-Copilot-Atlas/main/install.sh | bash
+
+# macOS / Linux — workspace scope (project-specific, run from project root)
+curl -fsSL https://raw.githubusercontent.com/numo16/Github-Copilot-Atlas/main/install.sh | bash -s -- --scope=workspace
 ```
 
 ```powershell
-# Windows (PowerShell)
+# Windows — user scope (global, default)
 irm https://raw.githubusercontent.com/numo16/Github-Copilot-Atlas/main/install.ps1 | iex
+
+# Windows — workspace scope (project-specific, run from project root)
+$s = irm https://raw.githubusercontent.com/numo16/Github-Copilot-Atlas/main/install.ps1
+& ([scriptblock]::Create($s)) -Scope workspace
 ```
 
 ---
@@ -41,19 +48,36 @@ Follow the steps below exactly.
 
 ---
 
-### Step 0: Ask about VS Code edition
+### Step 0: Ask about installation scope
 
-Ask the user one question:
+Ask the user the following question before proceeding:
 
-> **Are you running VS Code or VS Code Insiders?**
-> - VS Code (stable) → use the standard paths below
-> - VS Code Insiders → use the Insiders paths below
+> **Where would you like to install the Atlas agents?**
+>
+> 1. **User scope (global, recommended)** — agents are available in every VS Code
+>    project on this machine. Installed into the VS Code User prompts directory.
+>
+> 2. **Workspace scope (project-specific)** — agents are stored in `.vscode/` inside
+>    the current project folder and can be committed to version control to share them
+>    with the whole team.
+
+Record their answer as `SCOPE` (`user` or `workspace`).
 
 ---
 
-### Step 1: Determine the prompts directory
+### Step 1: Ask about VS Code edition
 
-Use the table below to identify `PROMPTS_DIR` for the user's OS and edition.
+Ask the user:
+
+> **Are you running VS Code or VS Code Insiders?**
+> - VS Code (stable)
+> - VS Code Insiders
+
+---
+
+### Step 2: Determine the install directory
+
+**If SCOPE = user**, use the table below to identify `INSTALL_DIR`:
 
 | OS | VS Code (stable) | VS Code Insiders |
 |---|---|---|
@@ -61,34 +85,41 @@ Use the table below to identify `PROMPTS_DIR` for the user's OS and edition.
 | **Linux** | `~/.config/Code/User/prompts` | `~/.config/Code - Insiders/User/prompts` |
 | **Windows** | `%APPDATA%\Code\User\prompts` | `%APPDATA%\Code - Insiders\User\prompts` |
 
-Detect the OS automatically if possible (e.g. `uname -s` on Unix; check `$env:OS` on
-Windows), or ask the user to confirm.
+**If SCOPE = workspace**, `INSTALL_DIR` is the `.vscode` folder inside the user's
+project root (wherever they are currently working). Ask them to confirm their project
+root path if you are not sure, then set:
+
+```
+INSTALL_DIR = <project-root>/.vscode
+```
+
+Detect the OS automatically if possible (e.g. `uname -s` on Unix; check `$env:OS`
+on Windows), or ask the user to confirm.
 
 ---
 
-### Step 2: Create the prompts directory (if it does not already exist)
+### Step 3: Create the install directory (if it does not already exist)
 
 **macOS / Linux:**
 ```bash
-mkdir -p "<PROMPTS_DIR>"
+mkdir -p "<INSTALL_DIR>"
 ```
 
 **Windows (PowerShell):**
 ```powershell
-New-Item -ItemType Directory -Force -Path "$env:APPDATA\Code\User\prompts"
-# (replace path with Insiders path if needed)
+New-Item -ItemType Directory -Force -Path "<INSTALL_DIR>"
 ```
 
 ---
 
-### Step 3: Download and install all agent files
+### Step 4: Download and install all agent files
 
-Download each `.agent.md` file from the repository into `PROMPTS_DIR`.
+Download each `.agent.md` file from the repository into `INSTALL_DIR`.
 
 **macOS / Linux:**
 ```bash
 BASE_URL="https://raw.githubusercontent.com/numo16/Github-Copilot-Atlas/main"
-PROMPTS_DIR="<PROMPTS_DIR>"
+INSTALL_DIR="<INSTALL_DIR>"
 
 for agent in \
   Atlas.agent.md \
@@ -98,7 +129,7 @@ for agent in \
   Explorer-subagent.agent.md \
   Code-Review-subagent.agent.md \
   Frontend-Engineer-subagent.agent.md; do
-    curl -fsSL "$BASE_URL/$agent" -o "$PROMPTS_DIR/$agent" \
+    curl -fsSL "$BASE_URL/$agent" -o "$INSTALL_DIR/$agent" \
       && echo "✓ $agent" \
       || echo "✗ $agent (download failed)"
 done
@@ -106,8 +137,8 @@ done
 
 **Windows (PowerShell):**
 ```powershell
-$baseUrl   = "https://raw.githubusercontent.com/numo16/Github-Copilot-Atlas/main"
-$promptsDir = "$env:APPDATA\Code\User\prompts"   # adjust for Insiders if needed
+$baseUrl    = "https://raw.githubusercontent.com/numo16/Github-Copilot-Atlas/main"
+$installDir = "<INSTALL_DIR>"
 
 $agents = @(
   "Atlas.agent.md",
@@ -120,17 +151,22 @@ $agents = @(
 )
 
 foreach ($agent in $agents) {
-  Invoke-WebRequest -Uri "$baseUrl/$agent" -OutFile "$promptsDir\$agent"
+  Invoke-WebRequest -Uri "$baseUrl/$agent" -OutFile "$installDir\$agent" -UseBasicParsing
   Write-Host "✓ $agent"
 }
 ```
 
 ---
 
-### Step 4: Apply the recommended VS Code settings
+### Step 5: Apply the recommended VS Code settings
 
-Ask the user to open their VS Code User Settings JSON
-(`Ctrl+Shift+P` → **Open User Settings (JSON)**) and add the following entries:
+**If SCOPE = user**, ask the user to open **User Settings JSON**:
+`Ctrl+Shift+P` → **Open User Settings (JSON)**
+
+**If SCOPE = workspace**, ask the user to open **Workspace Settings JSON**:
+`Ctrl+Shift+P` → **Open Workspace Settings (JSON)**
+
+Add the following entries:
 
 ```json
 {
@@ -144,20 +180,23 @@ Ask the user to open their VS Code User Settings JSON
 - `github.copilot.chat.responsesApiReasoningEffort` — enables enhanced reasoning for
   GPT-based planning agents (Prometheus).
 
+If SCOPE = workspace, remind the user they can commit `.vscode/settings.json` along
+with the agent files so the whole team inherits the same settings automatically.
+
 ---
 
-### Step 5: Verify the installation
+### Step 6: Verify the installation
 
 Run the following command and confirm all seven agent files are present:
 
 **macOS / Linux:**
 ```bash
-ls "<PROMPTS_DIR>"/*.agent.md
+ls "<INSTALL_DIR>"/*.agent.md
 ```
 
 **Windows (PowerShell):**
 ```powershell
-Get-ChildItem "$promptsDir\*.agent.md" | Select-Object Name
+Get-ChildItem "<INSTALL_DIR>\*.agent.md" | Select-Object Name
 ```
 
 Expected files:
@@ -173,7 +212,7 @@ Sisyphus-subagent.agent.md
 
 ---
 
-### Step 6: Reload VS Code
+### Step 7: Reload VS Code
 
 Tell the user to reload VS Code so it picks up the new agents:
 
@@ -184,8 +223,12 @@ by typing `@Atlas` or `@Prometheus` in the chat panel.
 
 ---
 
-### Step 7: Point the user to the overview
+### Step 8: Point the user to the overview
 
 Let them know they can read the
 [README](https://github.com/numo16/Github-Copilot-Atlas/blob/main/README.md)
 for a full overview of every agent and the recommended development workflow.
+
+If SCOPE = workspace, also remind them that committing `.vscode/*.agent.md` and
+`.vscode/settings.json` to the repository is the easiest way to share the Atlas
+setup with the entire team.

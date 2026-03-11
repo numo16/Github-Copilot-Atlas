@@ -1,5 +1,20 @@
 # install.ps1 — GitHub Copilot Atlas installer for Windows (PowerShell)
-# Usage: irm https://raw.githubusercontent.com/numo16/Github-Copilot-Atlas/main/install.ps1 | iex
+#
+# Usage (user/global scope — default):
+#   irm https://raw.githubusercontent.com/numo16/Github-Copilot-Atlas/main/install.ps1 | iex
+#
+# Usage (workspace/project scope — run from your project root):
+#   $s = irm https://raw.githubusercontent.com/numo16/Github-Copilot-Atlas/main/install.ps1
+#   & ([scriptblock]::Create($s)) -Scope workspace
+#
+# Parameters:
+#   -Scope user        Install into the VS Code User prompts directory (default, available in all projects)
+#   -Scope workspace   Install into .vscode\ in the current directory (project-specific)
+
+param(
+  [ValidateSet("user", "workspace")]
+  [string]$Scope = "user"
+)
 
 $ErrorActionPreference = "Stop"
 
@@ -16,7 +31,7 @@ $Agents = @(
 )
 
 # ── Detect VS Code edition ─────────────────────────────────────────────────────
-function Get-PromptsDir {
+function Get-UserPromptsDir {
   $stableDir   = Join-Path $env:APPDATA "Code\User\prompts"
   $insidersDir = Join-Path $env:APPDATA "Code - Insiders\User\prompts"
 
@@ -27,11 +42,21 @@ function Get-PromptsDir {
   return $stableDir
 }
 
-# Allow override via environment variable
-$PromptsDir = if ($env:COPILOT_ATLAS_PROMPTS_DIR) {
-  $env:COPILOT_ATLAS_PROMPTS_DIR
+# ── Resolve install directory ──────────────────────────────────────────────────
+if ($Scope -eq "workspace") {
+  $InstallDir = if ($env:COPILOT_ATLAS_PROMPTS_DIR) {
+    $env:COPILOT_ATLAS_PROMPTS_DIR
+  } else {
+    Join-Path (Get-Location) ".vscode"
+  }
+  $ScopeLabel = "workspace (.vscode\)"
 } else {
-  Get-PromptsDir
+  $InstallDir = if ($env:COPILOT_ATLAS_PROMPTS_DIR) {
+    $env:COPILOT_ATLAS_PROMPTS_DIR
+  } else {
+    Get-UserPromptsDir
+  }
+  $ScopeLabel = "user (global)"
 }
 
 # ── Intro ──────────────────────────────────────────────────────────────────────
@@ -40,13 +65,14 @@ Write-Host "╔═════════════════════�
 Write-Host "║      GitHub Copilot Atlas — Installer     ║" -ForegroundColor Cyan
 Write-Host "╚═══════════════════════════════════════════╝" -ForegroundColor Cyan
 Write-Host ""
-Write-Host "[Atlas] Prompts dir : $PromptsDir" -ForegroundColor Cyan
+Write-Host "[Atlas] Scope       : $ScopeLabel" -ForegroundColor Cyan
+Write-Host "[Atlas] Install dir : $InstallDir" -ForegroundColor Cyan
 Write-Host ""
 
-# ── Create prompts directory ───────────────────────────────────────────────────
-if (-not (Test-Path $PromptsDir)) {
-  Write-Host "[Atlas] Creating prompts directory ..." -ForegroundColor Cyan
-  New-Item -ItemType Directory -Force -Path $PromptsDir | Out-Null
+# ── Create install directory ───────────────────────────────────────────────────
+if (-not (Test-Path $InstallDir)) {
+  Write-Host "[Atlas] Creating directory ..." -ForegroundColor Cyan
+  New-Item -ItemType Directory -Force -Path $InstallDir | Out-Null
 }
 
 # ── Download agents ────────────────────────────────────────────────────────────
@@ -56,7 +82,7 @@ Write-Host ""
 $Failed = 0
 foreach ($agent in $Agents) {
   $url  = "$BaseUrl/$agent"
-  $dest = Join-Path $PromptsDir $agent
+  $dest = Join-Path $InstallDir $agent
   try {
     Invoke-WebRequest -Uri $url -OutFile $dest -UseBasicParsing
     Write-Host "  ✓ $agent" -ForegroundColor Green
@@ -74,10 +100,21 @@ if ($Failed -gt 0) {
   exit 1
 }
 
-Write-Host "✓ All agents installed to: $PromptsDir" -ForegroundColor Green
+Write-Host "✓ All agents installed to: $InstallDir" -ForegroundColor Green
 Write-Host ""
+
+if ($Scope -eq "workspace") {
+  Write-Host "⚠ Workspace install — agents are available only in this project." -ForegroundColor Yellow
+  Write-Host "  Commit the .vscode\*.agent.md files to share them with your team."
+  Write-Host ""
+}
+
 Write-Host "Next steps:" -ForegroundColor Yellow
-Write-Host "  1. Open VS Code User Settings JSON (Ctrl+Shift+P → 'Open User Settings (JSON)')"
+if ($Scope -eq "user") {
+  Write-Host "  1. Open VS Code User Settings JSON (Ctrl+Shift+P → 'Open User Settings (JSON)')"
+} else {
+  Write-Host "  1. Open VS Code Workspace Settings JSON (Ctrl+Shift+P → 'Open Workspace Settings (JSON)')"
+}
 Write-Host "     and add:"
 Write-Host '     {'
 Write-Host '       "chat.customAgentInSubagent.enabled": true,'
