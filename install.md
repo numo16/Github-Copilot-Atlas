@@ -166,10 +166,7 @@ foreach ($agent in $agents) {
 **If SCOPE = user**, ask the user to open **User Settings JSON**:
 `Ctrl+Shift+P` → **Open User Settings (JSON)**
 
-**If SCOPE = workspace**, ask the user to open **Workspace Settings JSON**:
-`Ctrl+Shift+P` → **Open Workspace Settings (JSON)**
-
-Add the following entries:
+Add the following entries and save:
 
 ```json
 {
@@ -178,12 +175,58 @@ Add the following entries:
 }
 ```
 
+**If SCOPE = workspace**, offer to apply the settings automatically:
+
+> "Would you like me to write the recommended VS Code workspace settings to
+> `.vscode/settings.json` for you?"
+
+If the user says **yes**, run the following to create or update the file:
+
+**macOS / Linux:**
+```bash
+mkdir -p .vscode
+python3 - << 'EOF'
+import json, os
+path = '.vscode/settings.json'
+try:
+    with open(path) as f:
+        s = json.load(f)
+except Exception:
+    s = {}
+s['chat.customAgentInSubagent.enabled'] = True
+s['github.copilot.chat.responsesApiReasoningEffort'] = 'high'
+with open(path, 'w') as f:
+    json.dump(s, f, indent=2)
+    f.write('\n')
+print(f"✓ Settings written to {path}")
+EOF
+```
+
+**Windows (PowerShell):**
+```powershell
+New-Item -ItemType Directory -Force -Path .vscode | Out-Null
+$path = '.vscode\settings.json'
+if (Test-Path $path) {
+    try { $s = Get-Content $path -Raw | ConvertFrom-Json } catch { $s = [PSCustomObject]@{} }
+} else {
+    $s = [PSCustomObject]@{}
+}
+$s | Add-Member -MemberType NoteProperty -Name "chat.customAgentInSubagent.enabled" -Value $true -Force
+$s | Add-Member -MemberType NoteProperty -Name "github.copilot.chat.responsesApiReasoningEffort" -Value "high" -Force
+$s | ConvertTo-Json -Depth 10 | Set-Content $path
+Write-Host "✓ Settings written to $path" -ForegroundColor Green
+```
+
+If the user says **no** (or if applying automatically fails), fall back to the manual
+instruction — ask them to open **Workspace Settings JSON**:
+`Ctrl+Shift+P` → **Open Workspace Settings (JSON)** — and add the entries above.
+
 - `chat.customAgentInSubagent.enabled` — allows sub-agents to invoke the custom
   `.agent.md` agents installed above.
 - `github.copilot.chat.responsesApiReasoningEffort` — enables enhanced reasoning for
   GPT-based planning agents (Prometheus).
 
-If SCOPE = workspace, remind the user they can commit `.github/agents/settings.json`
+If SCOPE = workspace, remind the user they can commit `.vscode/settings.json`
 along with the agent files so the whole team inherits the same settings automatically.
 
 ---

@@ -109,19 +109,58 @@ if ($Scope -eq "workspace") {
   Write-Host ""
 }
 
-Write-Host "Next steps:" -ForegroundColor Yellow
-if ($Scope -eq "user") {
-  Write-Host "  1. Open VS Code User Settings JSON (Ctrl+Shift+P → 'Open User Settings (JSON)')"
-} else {
-  Write-Host "  1. Open VS Code Workspace Settings JSON (Ctrl+Shift+P → 'Open Workspace Settings (JSON)')"
+# ── Apply VS Code workspace settings (workspace scope only) ───────────────────
+$SettingsApplied = $false
+if ($Scope -eq "workspace") {
+  $VsCodeDir      = Join-Path (Get-Location) ".vscode"
+  $SettingsFile   = Join-Path $VsCodeDir "settings.json"
+
+  $applySettings = Read-Host "[Atlas] Apply recommended VS Code workspace settings to '$SettingsFile'? [Y/n]"
+
+  if ($applySettings -notmatch '^[Nn]') {
+    if (-not (Test-Path $VsCodeDir)) {
+      New-Item -ItemType Directory -Force -Path $VsCodeDir | Out-Null
+    }
+
+    if (Test-Path $SettingsFile) {
+      try {
+        $settings = Get-Content $SettingsFile -Raw | ConvertFrom-Json
+      } catch {
+        $settings = [PSCustomObject]@{}
+      }
+    } else {
+      $settings = [PSCustomObject]@{}
+    }
+
+    $settings | Add-Member -MemberType NoteProperty -Name "chat.customAgentInSubagent.enabled"                   -Value $true  -Force
+    $settings | Add-Member -MemberType NoteProperty -Name "github.copilot.chat.responsesApiReasoningEffort" -Value "high" -Force
+
+    $settings | ConvertTo-Json -Depth 10 | Set-Content $SettingsFile
+    Write-Host "✓ Applied settings to $SettingsFile" -ForegroundColor Green
+    $SettingsApplied = $true
+  }
+  Write-Host ""
 }
-Write-Host "     and add:"
-Write-Host '     {'
-Write-Host '       "chat.customAgentInSubagent.enabled": true,'
-Write-Host '       "github.copilot.chat.responsesApiReasoningEffort": "high"'
-Write-Host '     }'
-Write-Host "  2. Reload VS Code (Ctrl+Shift+P → 'Developer: Reload Window')"
-Write-Host "  3. Start chatting with @Atlas or @Prometheus in Copilot Chat!"
+
+# ── Next steps ─────────────────────────────────────────────────────────────────
+Write-Host "Next steps:" -ForegroundColor Yellow
+$step = 1
+if (-not $SettingsApplied) {
+  if ($Scope -eq "user") {
+    Write-Host "  $step. Open VS Code User Settings JSON (Ctrl+Shift+P → 'Open User Settings (JSON)')"
+  } else {
+    Write-Host "  $step. Open VS Code Workspace Settings JSON (Ctrl+Shift+P → 'Open Workspace Settings (JSON)')"
+  }
+  Write-Host "     and add:"
+  Write-Host '     {'
+  Write-Host '       "chat.customAgentInSubagent.enabled": true,'
+  Write-Host '       "github.copilot.chat.responsesApiReasoningEffort": "high"'
+  Write-Host '     }'
+  $step++
+}
+Write-Host "  $step. Reload VS Code (Ctrl+Shift+P → 'Developer: Reload Window')"
+$step++
+Write-Host "  $step. Start chatting with @Atlas or @Prometheus in Copilot Chat!"
 Write-Host ""
 Write-Host "Full documentation: https://github.com/numo16/Github-Copilot-Atlas" -ForegroundColor Cyan
 Write-Host ""

@@ -134,20 +134,64 @@ if [[ "$SCOPE" == "workspace" ]]; then
   echo ""
 fi
 
-warn "Next steps:"
-if [[ "$SCOPE" == "user" ]]; then
-  echo "  1. Open VS Code User Settings JSON (Ctrl+Shift+P → 'Open User Settings (JSON)')"
-  echo "     and add:"
-else
-  echo "  1. Open VS Code Workspace Settings JSON (Ctrl+Shift+P → 'Open Workspace Settings (JSON)')"
-  echo "     and add:"
+# ── Apply VS Code workspace settings (workspace scope only) ───────────────────
+SETTINGS_APPLIED=0
+if [[ "$SCOPE" == "workspace" ]]; then
+  VSCODE_SETTINGS_DIR="$(pwd)/.vscode"
+  VSCODE_SETTINGS_FILE="$VSCODE_SETTINGS_DIR/settings.json"
+
+  printf "${CYAN}${BOLD}[Atlas]${RESET} Apply recommended VS Code workspace settings\n"
+  printf "       to ${BOLD}%s${RESET}? [Y/n] " "$VSCODE_SETTINGS_FILE"
+  read -r _apply_settings </dev/tty 2>/dev/null || _apply_settings="y"
+
+  if [[ "${_apply_settings,,}" != "n" ]]; then
+    mkdir -p "$VSCODE_SETTINGS_DIR"
+    _py_tmp=$(mktemp /tmp/atlas_settings_XXXXXX.py)
+    cat > "$_py_tmp" << 'PYEOF'
+import json, sys
+path = sys.argv[1]
+try:
+    with open(path) as f:
+        s = json.load(f)
+except Exception:
+    s = {}
+s['chat.customAgentInSubagent.enabled'] = True
+s['github.copilot.chat.responsesApiReasoningEffort'] = 'high'
+with open(path, 'w') as f:
+    json.dump(s, f, indent=2)
+    f.write('\n')
+PYEOF
+    if python3 "$_py_tmp" "$VSCODE_SETTINGS_FILE" 2>/dev/null; then
+      success "Applied settings to $VSCODE_SETTINGS_FILE"
+      SETTINGS_APPLIED=1
+    else
+      warn "Could not apply settings automatically (python3 not found)."
+    fi
+    rm -f "$_py_tmp"
+  fi
+  echo ""
 fi
-echo '     {'
-echo '       "chat.customAgentInSubagent.enabled": true,'
-echo '       "github.copilot.chat.responsesApiReasoningEffort": "high"'
-echo '     }'
-echo "  2. Reload VS Code (Ctrl+Shift+P → 'Developer: Reload Window')"
-echo "  3. Start chatting with @Atlas or @Prometheus in Copilot Chat!"
+
+# ── Next steps ────────────────────────────────────────────────────────────────
+warn "Next steps:"
+STEP=1
+if [[ "$SETTINGS_APPLIED" -eq 0 ]]; then
+  if [[ "$SCOPE" == "user" ]]; then
+    echo "  $STEP. Open VS Code User Settings JSON (Ctrl+Shift+P → 'Open User Settings (JSON)')"
+    echo "     and add:"
+  else
+    echo "  $STEP. Open VS Code Workspace Settings JSON (Ctrl+Shift+P → 'Open Workspace Settings (JSON)')"
+    echo "     and add:"
+  fi
+  echo '     {'
+  echo '       "chat.customAgentInSubagent.enabled": true,'
+  echo '       "github.copilot.chat.responsesApiReasoningEffort": "high"'
+  echo '     }'
+  STEP=$((STEP + 1))
+fi
+echo "  $STEP. Reload VS Code (Ctrl+Shift+P → 'Developer: Reload Window')"
+STEP=$((STEP + 1))
+echo "  $STEP. Start chatting with @Atlas or @Prometheus in Copilot Chat!"
 echo ""
 echo -e "${BOLD}Full documentation:${RESET} https://github.com/numo16/Github-Copilot-Atlas"
 echo ""
