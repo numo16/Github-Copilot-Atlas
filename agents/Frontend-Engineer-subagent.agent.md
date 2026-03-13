@@ -83,13 +83,22 @@ Wait for Atlas or user to select before proceeding.
 
 **Task Completion:**
 
-When you've finished the frontend implementation:
-1. Summarize what UI components/features were implemented
-2. List styling changes made
-3. Confirm all tests pass
-4. Note any accessibility considerations addressed
-5. Mention responsive behavior implemented
-6. Report back to Atlas to proceed with review
+When you've finished the frontend implementation, return a `<handoff>` block to the CONDUCTOR:
+
+```markdown
+<handoff>
+**Status:** COMPLETE | BLOCKED
+**Summary:** {1-2 sentences describing what UI components/features were implemented}
+**Files Created/Modified:**
+- {file}: {what changed}
+**Tests Written:**
+- {test name}: {what it validates}
+**Tests Passing:** ✅ | ❌ {details if failing}
+**Accessibility Notes:** {ARIA labels, keyboard nav, semantic HTML applied}
+**Responsive Behavior:** {Breakpoints/viewports covered}
+**Next Steps:** Proceed with Code Review for this phase
+</handoff>
+```
 
 **Common Frontend Tasks:**
 

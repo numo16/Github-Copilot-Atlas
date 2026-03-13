@@ -22,7 +22,7 @@ Hard constraints:
 Output contract (STRICT):
 - Before using any tools, output an intent analysis wrapped in <analysis>...</analysis> describing what you are trying to find and how you'll search.
 - Your FIRST tool usage must launch at least THREE independent searches using multi_tool_use.parallel before reading files.
-- Your final response MUST be a single <results>...</results> block containing exactly:
+- Your final response MUST be a single <handoff>...</handoff> block containing exactly:
   - <files> list of absolute file paths with 1-line relevance notes
   - <answer> concise explanation of what you found/how it works
   - <next_steps> 2-5 actionable next actions the parent agent should take

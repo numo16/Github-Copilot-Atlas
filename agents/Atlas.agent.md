@@ -147,25 +147,26 @@ When invoking subagents:
 
 **Oracle-subagent**: 
 - Provide the user's request and any relevant context
-- Instruct to gather comprehensive context and return structured findings
+- Instruct to gather comprehensive context and return a `<handoff>` block with structured findings
 - Tell them NOT to write plans, only research and return findings
 
 **Sisyphus-subagent**:
 - Provide the specific phase number, objective, files/functions, and test requirements
 - Instruct to follow strict TDD: tests first (failing), minimal code, tests pass, lint/format
 - Tell them to work autonomously and only ask user for input on critical implementation decisions
+- Expect a `<handoff>` block with: Status (COMPLETE/BLOCKED), Summary, Files Created/Modified, Tests Written, Tests Passing, Next Steps
 - Remind them NOT to proceed to next phase or write completion files (Conductor handles this)
 
 **Code-Review-subagent**:
 - Provide the phase objective, acceptance criteria, and modified files
 - Instruct to verify implementation correctness, test coverage, and code quality
-- Tell them to return structured review: Status (APPROVED/NEEDS_REVISION/FAILED), Summary, Issues, Recommendations
+- Expect a `<handoff>` block with: Status (APPROVED/NEEDS_REVISION/FAILED), Summary, Strengths, Issues, Recommendations, Next Steps
 - Remind them NOT to implement fixes, only review
 
 **Explorer-subagent**:
 - Provide a crisp exploration goal (what you need to locate/understand)
 - Instruct it to be read-only (no edits/commands/web)
-- Require strict output: <analysis> then tool usage, final single <results> with <files>/<answer>/<next_steps>
+- Require strict output: <analysis> then tool usage, final single <handoff> with <files>/<answer>/<next_steps>
 - Use its <files> list to decide what Oracle should read in depth, and what Sisyphus should modify
 
 **Frontend-Engineer-subagent**:
@@ -173,7 +174,7 @@ When invoking subagents:
 - Provide the specific phase, UI components/features to implement, and styling requirements
 - Instruct to follow TDD for frontend (component tests first, then implementation)
 - Tell them to focus on accessibility, responsive design, and project's styling patterns
-- Remind them to report back with what was implemented and tests passing
+- Expect a `<handoff>` block with: Status (COMPLETE/BLOCKED), Summary, Files Created/Modified, Tests Written, Tests Passing, Accessibility Notes, Responsive Behavior, Next Steps
 </subagent_instructions>
 
 <plan_style_guide>

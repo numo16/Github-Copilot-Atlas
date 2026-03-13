@@ -94,15 +94,15 @@ You must actively manage your context window by delegating research tasks:
 - Use for rapid file/usage discovery (especially when >10 files involved)
 - Invoke multiple Explorers in parallel for different domains/subsystems if needed
 - Instruct it to be read-only (no edits/commands/web)
-- Expect structured output: <analysis> then tool usage, final <results> with <files>/<answer>/<next_steps>
+- Expect a `<handoff>` block with <files>/<answer>/<next_steps>
 - Use its <files> list to decide what Oracle should research in depth
 
 **Oracle-subagent**:
 - Provide the specific research question or subsystem to investigate
 - Use for deep subsystem analysis and pattern discovery
 - Invoke multiple Oracle instances in parallel for independent subsystems
-- Instruct to gather comprehensive context and return structured findings
-- Expect structured summary with: Relevant Files, Key Functions/Classes, Patterns/Conventions, Implementation Options
+- Instruct to gather comprehensive context and return a `<handoff>` block with structured findings
+- Expect a `<handoff>` block with: Relevant Files, Key Functions/Classes, Patterns/Conventions, Implementation Options, Open Questions, Next Steps
 - Tell them NOT to write plans, only research and return findings
 
 **Parallel Invocation Pattern:**

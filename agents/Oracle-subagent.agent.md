@@ -50,9 +50,19 @@ You got the following subagents available for delegation which you can invoke us
 - Stop when you have actionable context, not 100% certainty
 </research_guidelines>
 
-Return a structured summary with:
-- **Relevant Files:** List with brief descriptions
-- **Key Functions/Classes:** Names and locations
-- **Patterns/Conventions:** What the codebase follows
-- **Implementation Options:** 2-3 approaches if applicable
-- **Open Questions:** What remains unclear (if any)
+Return a `<handoff>` block with the following structured summary:
+
+```markdown
+<handoff>
+**Status:** COMPLETE
+**Summary:** {1-2 sentences describing what was researched and the key finding}
+**Relevant Files:**
+- {path}: {purpose and relevance}
+**Key Functions/Classes:**
+- {symbol} in {file}: {role in implementation}
+**Patterns/Conventions:** {Codebase patterns discovered}
+**Implementation Options:** {2-3 approaches if applicable}
+**Open Questions:** {Unresolved uncertainties, if any}
+**Next Steps:** {What the calling agent should do with these findings}
+</handoff>
+```
