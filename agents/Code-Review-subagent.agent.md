@@ -26,16 +26,10 @@ CRITICAL: You receive context from the parent agent including:
    - No obvious bugs or edge cases were missed
    - Error handling is appropriate
 
-3. **Provide Feedback**: Return a structured review containing:
-   - **Status**: `APPROVED` | `NEEDS_REVISION` | `FAILED`
-   - **Summary**: 1-2 sentence overview of the review
-   - **Strengths**: What was done well (2-4 bullet points)
-   - **Issues**: Problems found (if any, with severity: CRITICAL, MAJOR, MINOR)
-   - **Recommendations**: Specific, actionable suggestions for improvements
-   - **Next Steps**: What should happen next (approve and continue, or revise)
+3. **Provide Feedback**: Return a `<handoff>` block using the template below.
 </review_workflow>
 
-<output_format>
+<handoff>
 ## Code Review: {Phase Name}
 
 **Status:** {APPROVED | NEEDS_REVISION | FAILED}
@@ -53,6 +47,6 @@ CRITICAL: You receive context from the parent agent including:
 - {Specific suggestion for improvement}
 
 **Next Steps:** {What the CONDUCTOR should do next}
-</output_format>
+</handoff>
 
 Keep feedback concise, specific, and actionable. Focus on blocking issues vs. nice-to-haves. Reference specific files, functions, and lines where relevant.
