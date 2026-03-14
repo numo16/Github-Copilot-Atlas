@@ -2,10 +2,10 @@
 # install.sh — GitHub Copilot Toolkit installer for macOS and Linux
 #
 # Usage (user/global scope — default, installs all components):
-#   curl -fsSL https://raw.githubusercontent.com/numo16/Github-Copilot-Atlas/main/install.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/numo16/Github-Copilot-Toolkit/main/install.sh | bash
 #
 # Usage (workspace/project scope — run from your project root):
-#   curl -fsSL https://raw.githubusercontent.com/numo16/Github-Copilot-Atlas/main/install.sh | bash -s -- --scope=workspace
+#   curl -fsSL https://raw.githubusercontent.com/numo16/Github-Copilot-Toolkit/main/install.sh | bash -s -- --scope=workspace
 #
 # Selective install (comma-separated list of: agents, skills, instructions, hooks, all):
 #   curl -fsSL ... | bash -s -- --scope=workspace --components=agents,skills
@@ -17,7 +17,7 @@
 
 set -euo pipefail
 
-BASE_URL="https://raw.githubusercontent.com/numo16/Github-Copilot-Atlas/main"
+BASE_URL="https://raw.githubusercontent.com/numo16/Github-Copilot-Toolkit/main"
 
 AGENTS=(
   "Atlas.agent.md"
@@ -262,5 +262,5 @@ if should_install "skills"; then
   STEP=$((STEP + 1))
 fi
 echo ""
-echo -e "${BOLD}Full documentation:${RESET} https://github.com/numo16/Github-Copilot-Atlas"
+echo -e "${BOLD}Full documentation:${RESET} https://github.com/numo16/Github-Copilot-Toolkit"
 echo ""

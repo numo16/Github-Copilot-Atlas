@@ -1,10 +1,10 @@
 # install.ps1 — GitHub Copilot Toolkit installer for Windows (PowerShell)
 #
 # Usage (user/global scope — default, installs all components):
-#   irm https://raw.githubusercontent.com/numo16/Github-Copilot-Atlas/main/install.ps1 | iex
+#   irm https://raw.githubusercontent.com/numo16/Github-Copilot-Toolkit/main/install.ps1 | iex
 #
 # Usage (workspace/project scope — run from your project root):
-#   $s = irm https://raw.githubusercontent.com/numo16/Github-Copilot-Atlas/main/install.ps1
+#   $s = irm https://raw.githubusercontent.com/numo16/Github-Copilot-Toolkit/main/install.ps1
 #   & ([scriptblock]::Create($s)) -Scope workspace
 #
 # Selective install (comma-separated list of: agents, skills, instructions, hooks, all):
@@ -24,7 +24,7 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-$BaseUrl = "https://raw.githubusercontent.com/numo16/Github-Copilot-Atlas/main"
+$BaseUrl = "https://raw.githubusercontent.com/numo16/Github-Copilot-Toolkit/main"
 
 $Agents = @(
   "Atlas.agent.md",
@@ -221,5 +221,5 @@ if (Should-Install "skills") {
   $step++
 }
 Write-Host ""
-Write-Host "Full documentation: https://github.com/numo16/Github-Copilot-Atlas" -ForegroundColor Cyan
+Write-Host "Full documentation: https://github.com/numo16/Github-Copilot-Toolkit" -ForegroundColor Cyan
 Write-Host ""
